@@ -10,7 +10,11 @@ else()
 	set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -D_FILE_OFFSET_BITS=64" CACHE STRING "")
 endif ()
 
-project(libbsdiff)
+if(ANDROID)
+    include(ndk-pkg.cmake)
+endif()
+
+project(libpatch)
 include_directories(
     src/bzip2
     src/bsdiff
@@ -28,12 +32,12 @@ set(libSRC
     src/bsdiff/bspatch.c
 )
 
-add_library(libbsdiff STATIC ${libSRC})
+add_library(libpatch STATIC ${libSRC})
 
 add_executable(bsdiff src/bsdiff/bsdiff.c)
 target_compile_definitions(bsdiff PUBLIC BSDIFF_EXECUTABLE)
-target_link_libraries(bsdiff libbsdiff)
+target_link_libraries(bsdiff libpatch)
 
 add_executable(bspatch src/bsdiff/bspatch.c)
 target_compile_definitions(bspatch PUBLIC BSPATCH_EXECUTABLE)
-target_link_libraries(bspatch libbsdiff)
+target_link_libraries(bspatch libpatch)
