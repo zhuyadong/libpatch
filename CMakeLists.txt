@@ -41,3 +41,9 @@ target_link_libraries(bsdiff libpatch)
 add_executable(bspatch src/bsdiff/bspatch.c)
 target_compile_definitions(bspatch PUBLIC BSPATCH_EXECUTABLE)
 target_link_libraries(bspatch libpatch)
+
+install(TARGETS libpatch
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+)
