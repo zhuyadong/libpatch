@@ -55,7 +55,7 @@ static int64_t offtin(uint8_t *buf)
 }
 
 #if !defined(BSPATCH_EXECUTABLE)
-int bspatch(const uint8_t *old, int64_t oldsize, uint8_t *new, int64_t newsize, struct bspatch_stream *stream)
+DLLAPI int bspatch(const uint8_t *old, int64_t oldsize, uint8_t *new, int64_t newsize, struct bspatch_stream *stream)
 {
 	uint8_t buf[8];
 	int64_t oldpos, newpos;
@@ -136,7 +136,7 @@ static int bz2_read(const struct bspatch_stream *stream, void *buffer, int lengt
 }
 
 #if !defined(BSPATCH_EXECUTABLE)
-int fbspatch(const char *oldpath, const char *newpath, const char *patchpath)
+DLLAPI int fbspatch(const char *oldpath, const char *patchpath, const char *newpath)
 {
 	FILE *f;
 	int fd, ret;

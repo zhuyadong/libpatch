@@ -33,9 +33,11 @@
 #ifdef WIN32
 #define X_RDONLY _O_RDONLY | _O_BINARY
 #define X_WRONLY _O_WRONLY | _O_BINARY
+#define DLLAPI _declspec(dllexport)
 #else
 #define X_RDONLY O_RDONLY
 #define X_WRONLY O_WRONLY
+#define DLLAPI
 #endif
 
 struct bspatch_stream
@@ -44,7 +46,7 @@ struct bspatch_stream
 	int (*read)(const struct bspatch_stream *stream, void *buffer, int length);
 };
 
-int bspatch(const uint8_t *old, int64_t oldsize, uint8_t *new, int64_t newsize, struct bspatch_stream *stream);
-int fbspatch(const char *oldpath, const char *newpath, const char *patchpath);
+DLLAPI int bspatch(const uint8_t *old, int64_t oldsize, uint8_t *new, int64_t newsize, struct bspatch_stream *stream);
+DLLAPI int fbspatch(const char *oldpath, const char *patchpath, const char *newpath);
 
 #endif

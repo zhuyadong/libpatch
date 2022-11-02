@@ -34,9 +34,11 @@
 #ifdef WIN32
 #define X_RDONLY _O_RDONLY | _O_BINARY
 #define X_WRONLY _O_WRONLY | _O_BINARY
+#define DLLAPI _declspec(dllexport)
 #else
 #define X_RDONLY O_RDONLY
 #define X_WRONLY O_WRONLY
+#define DLLAPI
 #endif
 
 struct bsdiff_stream
@@ -48,7 +50,9 @@ struct bsdiff_stream
 	int (*write)(struct bsdiff_stream *stream, const void *buffer, int size);
 };
 
-int bsdiff(const uint8_t *old, int64_t oldsize, const uint8_t *new, int64_t newsize, struct bsdiff_stream *stream);
-int fbsdiff(const char *oldpath, const char *newpath, const char *patchpath);
+DLLAPI int bsdiff(const uint8_t *old, int64_t oldsize, const uint8_t *new, int64_t newsize, struct bsdiff_stream *stream);
+DLLAPI int fbsdiff(const char *oldpath, const char *newpath, const char *patchpath);
+DLLAPI int mbsdiff(const uint8_t *olddata, uint64_t oldsize, const uint8_t *newdata, uint64_t newsize, const char *patchpath);
+DLLAPI int mbscmp(const uint8_t *olddata, const uint8_t *newdata, uint64_t size);
 
 #endif

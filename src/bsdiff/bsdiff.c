@@ -436,7 +436,7 @@ static int bsdiff_internal(const struct bsdiff_request req)
 }
 
 #if !defined(BSDIFF_EXECUTABLE)
-int bsdiff(const uint8_t *old, int64_t oldsize, const uint8_t *new, int64_t newsize, struct bsdiff_stream *stream)
+DLLAPI int bsdiff(const uint8_t *old, int64_t oldsize, const uint8_t *new, int64_t newsize, struct bsdiff_stream *stream)
 {
 	int result;
 	struct bsdiff_request req;
@@ -488,7 +488,7 @@ static int bz2_write(struct bsdiff_stream *stream, const void *buffer, int size)
 }
 
 #if !defined(BSDIFF_EXECUTABLE)
-int fbsdiff(const char *oldpath, const char *newpath, const char *patchpath)
+DLLAPI int fbsdiff(const char *oldpath, const char *newpath, const char *patchpath)
 {
 	int fd;
 	int bz2err;
@@ -551,6 +551,53 @@ int fbsdiff(const char *oldpath, const char *newpath, const char *patchpath)
 	/* Free the memory we used */
 	free(old);
 	free(new);
+
+	return 0;
+}
+
+DLLAPI int mbscmp(const uint8_t *olddata, const uint8_t *newdata, uint64_t size)
+{
+	return memcmp(olddata, newdata, size);
+}
+
+DLLAPI int mbsdiff(const uint8_t *olddata, uint64_t oldsize, const uint8_t *newdata, uint64_t newsize, const char *patchpath)
+{
+	int bz2err;
+	uint8_t buf[8];
+	FILE *pf;
+	struct bsdiff_stream stream;
+	BZFILE *bz2;
+
+	memset(&bz2, 0, sizeof(bz2));
+	stream.malloc = malloc;
+	stream.free = free;
+	stream.write = bz2_write;
+
+	if (oldsize == newsize && memcmp(olddata, newdata, oldsize) == 0)
+		return 0;
+
+	if ((pf = fopen(patchpath, "wb")) == NULL)
+		return 3;
+
+	/* Write header (signature+newsize)*/
+	offtout(newsize, buf);
+	if (fwrite("ENDSLEY/BSDIFF43", 16, 1, pf) != 1 ||
+		fwrite(buf, sizeof(buf), 1, pf) != 1)
+		return 4;
+
+	if (NULL == (bz2 = BZ2_bzWriteOpen(&bz2err, pf, 9, 0, 0)))
+		return 5;
+
+	stream.opaque = bz2;
+	if (bsdiff(olddata, oldsize, newdata, newsize, &stream))
+		return 6;
+
+	BZ2_bzWriteClose(&bz2err, bz2, 0, NULL, NULL);
+	if (bz2err != BZ_OK)
+		return 7;
+
+	if (fclose(pf))
+		return 8;
 
 	return 0;
 }
