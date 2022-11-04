@@ -10,10 +10,6 @@ else()
 	set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -D_FILE_OFFSET_BITS=64" CACHE STRING "")
 endif ()
 
-if(IOS)
-    include(cmake/ios.toolchain.cmake)
-endif()
-
 project(libpatch)
 include_directories(
     src/bzip2
@@ -39,13 +35,15 @@ else()
     add_library(libpatch STATIC ${libSRC})
 endif()
 
-add_executable(bsdiff src/bsdiff/bsdiff.c)
-target_compile_definitions(bsdiff PUBLIC BSDIFF_EXECUTABLE)
-target_link_libraries(bsdiff libpatch)
+if (WIN32)
+    add_executable(bsdiff src/bsdiff/bsdiff.c)
+    target_compile_definitions(bsdiff PUBLIC BSDIFF_EXECUTABLE)
+    target_link_libraries(bsdiff libpatch)
 
-add_executable(bspatch src/bsdiff/bspatch.c)
-target_compile_definitions(bspatch PUBLIC BSPATCH_EXECUTABLE)
-target_link_libraries(bspatch libpatch)
+    add_executable(bspatch src/bsdiff/bspatch.c)
+    target_compile_definitions(bspatch PUBLIC BSPATCH_EXECUTABLE)
+    target_link_libraries(bspatch libpatch)
+endif()
 
 install(TARGETS libpatch
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
