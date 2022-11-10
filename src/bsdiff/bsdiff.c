@@ -524,29 +524,64 @@ DLLAPI int fbsdiff(const char *oldpath, const char *newpath, const char *patchpa
 		(close(fd) == -1))
 		return 2;
 
+	if (oldsize == newsize && memcmp(old, new, oldsize) == 0)
+	{
+		free(old);
+		free(new);
+		return 0;
+	}
+
 	/* Create the patch file */
 	if ((pf = fopen(patchpath, "wb")) == NULL)
+	{
+		free(old);
+		free(new);
 		return 3;
+	}
 
 	/* Write header (signature+newsize)*/
 	offtout(newsize, buf);
 	if (fwrite("ENDSLEY/BSDIFF43", 16, 1, pf) != 1 ||
 		fwrite(buf, sizeof(buf), 1, pf) != 1)
+	{
+		free(old);
+		free(new);
+		fclose(pf);
 		return 4;
+	}
 
 	if (NULL == (bz2 = BZ2_bzWriteOpen(&bz2err, pf, 9, 0, 0)))
+	{
+		free(old);
+		free(new);
+		fclose(pf);
 		return 5;
+	}
 
 	stream.opaque = bz2;
 	if (bsdiff(old, oldsize, new, newsize, &stream))
+	{
+		free(old);
+		free(new);
+		fclose(pf);
 		return 6;
+	}
 
 	BZ2_bzWriteClose(&bz2err, bz2, 0, NULL, NULL);
 	if (bz2err != BZ_OK)
+	{
+		free(old);
+		free(new);
+		fclose(pf);
 		return 7;
+	}
 
 	if (fclose(pf))
+	{
+		free(old);
+		free(new);
 		return 8;
+	}
 
 	/* Free the memory we used */
 	free(old);
