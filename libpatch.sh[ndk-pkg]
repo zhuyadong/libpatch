@@ -1,0 +1,26 @@
+pkg_set summary "Binary patch lib"
+
+pkg_set webpage "https://github.com/zhuyadong/libpatch/wiki"
+
+# the source code download url of this package. the value of src.url must end with one of .git .zip .tar.xz .tar.gz .tar.lz .tar.bz2 .tgz .txz
+pkg_set src.url "https://github.com/zhuyadong/libpatch.git"
+
+# the sha256sum of source code. If the value of src.url end with .git, this function is optional, otherwise, this function must be invoked.
+#pkg_set src.sha "c3e5e9fdd5004dcb542feda5ee4f0ff0744628baf8ed2dd5d66f8ca1197cb1a1"
+
+# the version of this package. If this function is not invoked, it will be calculated from src.url.
+pkg_set version "0.0.1"
+pkg_set bsystem "cmake"
+
+# the license of this package.
+#pkg_set license "BSD"
+
+# the required commands of this package when installing. If specify multiple values, separate them with spaces.
+#pkg_set dep.cmd "a b c"
+
+# the packages are depended by this package. If specify multiple values, separate them with spaces.
+#pkg_set dep.pkg "a b c"
+
+build() {
+  cmakew -DCMAKE_BUILD_TYPE=Release
+}
