@@ -136,6 +136,85 @@ static int bz2_read(const struct bspatch_stream *stream, void *buffer, int lengt
 }
 
 #if !defined(BSPATCH_EXECUTABLE)
+DLLAPI int mbspatch(const uint8_t* olddata, const char* patchpath, const char* newpath)
+{
+	FILE *f;
+	int fd, ret;
+	int bz2err;
+	uint8_t header[24];
+	uint8_t *new = NULL;
+	int64_t oldsize, newsize, rdsize;
+	BZFILE *bz2;
+	struct bspatch_stream stream;
+	struct stat sb;
+
+	/* Open patch file */
+	if ((f = fopen(patchpath, "rb")) == NULL)
+		return 1;
+
+	/* Read header */
+	if (fread(header, 1, 24, f) != 24)
+	{
+		fclose(f);
+		return 2;
+	}
+
+	/* Check for appropriate magic */
+	if (memcmp(header, "ENDSLEY/BSDIFF43", 16) != 0)
+	{
+		fclose(f);
+		return 3;
+	}
+
+	/* Read lengths from header */
+	newsize = offtin(header + 16);
+	if (newsize < 0)
+	{
+		fclose(f);
+		return 4;
+	}
+
+	if ((new = malloc(newsize + 1)) == NULL)
+	{
+		fclose(f);
+		return 5;
+	}
+
+	if (NULL == (bz2 = BZ2_bzReadOpen(&bz2err, f, 0, 0, NULL, 0)))
+	{
+		fclose(f);
+		free(new);
+		return 6;
+	}
+
+	stream.read = bz2_read;
+	stream.opaque = bz2;
+	if ((ret = bspatch(olddata, oldsize, new, newsize, &stream)))
+	{
+		BZ2_bzReadClose(&bz2err, bz2);
+		fclose(f);
+		free(new);
+		return 7;
+	}
+
+	/* Clean up the bzip2 reads */
+	BZ2_bzReadClose(&bz2err, bz2);
+	fclose(f);
+
+	/* Write the new file */
+	if (((fd = open(newpath, O_CREAT | O_TRUNC | X_WRONLY, sb.st_mode)) < 0) ||
+		(write(fd, new, newsize) != newsize) || ((fd = close(fd)) == -1))
+	{
+		if (fd > 0)
+			close(fd);
+		free(new);
+		return 8;
+	}
+
+	free(new);
+	return 0;
+}
+
 DLLAPI int fbspatch(const char *oldpath, const char *patchpath, const char *newpath)
 {
 	FILE *f;
