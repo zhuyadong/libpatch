@@ -48,6 +48,6 @@ struct bspatch_stream
 
 DLLAPI int bspatch(const uint8_t *old, int64_t oldsize, uint8_t *new, int64_t newsize, struct bspatch_stream *stream);
 DLLAPI int fbspatch(const char *oldpath, const char *patchpath, const char *newpath);
-DLLAPI int mbspatch(const uint8_t* olddata, const char* patchpath, const char* newpath);
+DLLAPI int mbspatch(const uint8_t *olddata, int64_t oldsize, const char *patchpath, const char *newpath);
 
 #endif

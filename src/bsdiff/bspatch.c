@@ -136,14 +136,14 @@ static int bz2_read(const struct bspatch_stream *stream, void *buffer, int lengt
 }
 
 #if !defined(BSPATCH_EXECUTABLE)
-DLLAPI int mbspatch(const uint8_t* olddata, const char* patchpath, const char* newpath)
+DLLAPI int mbspatch(const uint8_t *olddata, int64_t oldsize, const char *patchpath, const char *newpath)
 {
 	FILE *f;
 	int fd, ret;
 	int bz2err;
 	uint8_t header[24];
 	uint8_t *new = NULL;
-	int64_t oldsize, newsize, rdsize;
+	int64_t newsize, rdsize;
 	BZFILE *bz2;
 	struct bspatch_stream stream;
 	struct stat sb;
